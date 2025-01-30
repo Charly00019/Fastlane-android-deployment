@@ -1,0 +1,31 @@
+git config --global --add safe.directory FLUTTER-PATH
+bundle exec fastlane android test
+bundle exec fastlane data
+bundle exec fastlane deploy
+bundle exec fastlane android deploy
+flutter build apk --release
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.jks app-release-unsigned.apk lappiahnuamah
+
+jarsigner -keystore C:\Users\law\Desktop\DEVOPS\fastlane\my-release-key.jks -storepass fastlane C:\Users\law\Desktop\DEVOPS\fastlane\new_app\build\app\outputs\apk\release\app-release.apk lappiahnuamah
+
+C:\Users\law\AppData\Local\Android\Sdk\android-sdk\build-tools\35.0.0\zipalign -v 4 C:\Users\law\Desktop\DEVOPS\fastlane\new_app\build\app\outputs\apk\release\app-release.apk release.apk
+
+$ java -jar pepk.jar --keystore=my-release-key.jks --alias=lappiahnuamah --output=output.zip --include-cert --rsa-aes-encryption --encryption-key-path='C:\Users\law\Desktop\DEVOPS\fastlane\encryption_public_key.pem'
+flutter build appbundle --release
+keytool -genkeypair -v -keystore C:\Users\law\Desktop\DEVOPS\fastlane\my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias lappiahnuamah
+
+
+C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\android\my-release-key.jks
+C:\Users\law\Downloads\jdk-22.0.1\bin\java.exe -jar pepk.jar --keystore='C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\android\my-release-key.jks' --alias=lappiahnuamah --output=private.pem --rsa-aes-encryption --encryption-key-path='C:\Users\law\Desktop\DEVOPS\fastlane\encryption_public_key.pem'
+
+'C:\Program Files\Java\jdk-19\bin\java.exe' -jar pepk.jar --keystore='C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\android\my-release-key.jks' --alias=lappiahnuamah --output=private.pem --rsa-aes-encryption --encryption-key-path='C:\Users\law\Desktop\DEVOPS\fastlane\encryption_public_key.pem'
+
+bundle exec fastlane supply --aab "C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\build\app\outputs\bundle\release\app-release.aab" --package_name com.devops.app --json_key "C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\sa.json" --track alpha
+bundle exec fastlane supply --aab "C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\build\app\outputs\bundle\release\app-release.aab" --package_name com.devops.new_app --json_key "C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\sa.json" --track internal --release_status completed
+./gradlew clean bundleRelease
+jarsigner -keystore "C:\Users\law\Desktop\DEVOPS\fastlane\my-release-key.jks" app-release.aab lappiahnuamah
+
+bundle exec fastlane supply --aab C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\build\app\outputs\bundle\release\app-release.aab --package_name com.devops.new_app --json_key C:\Users\law\Desktop\DEVOPS\fastlane\devops_app\sa.json --track alpha --release_status completed
+
+ 
+ jarsigner -keystore  trial_app\android\app\my-release-key.jks -storepass 'fastlane' app/build/outputs/apk/release/app.apk 'lappiahnuamah'

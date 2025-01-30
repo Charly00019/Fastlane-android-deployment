@@ -1,0 +1,166 @@
+// plugins {
+//     id "com.android.application"
+//     id "kotlin-android"
+//     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+//     id "dev.flutter.flutter-gradle-plugin"
+// }
+
+// def localProperties = new Properties()
+// def localPropertiesFile = rootProject.file("local.properties")
+// if (localPropertiesFile.exists()) {
+//     localPropertiesFile.withReader("UTF-8") { reader ->
+//         localProperties.load(reader)
+//     }
+// }
+
+// def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+// if (flutterVersionCode == null) {
+//     flutterVersionCode = "2"
+// }
+
+// def flutterVersionName = localProperties.getProperty("flutter.versionName")
+// if (flutterVersionName == null) {
+//     flutterVersionName = "2.0"
+// }
+
+// android {
+//     namespace = "com.devops.new_app"
+//     compileSdk = flutter.compileSdkVersion
+//     ndkVersion = flutter.ndkVersion
+
+//     compileOptions {
+//         sourceCompatibility = JavaVersion.VERSION_1_8
+//         targetCompatibility = JavaVersion.VERSION_1_8
+//     }
+
+//     defaultConfig {
+//         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+//         applicationId = "com.devops.new_app"
+//         // You can update the following values to match your application needs.
+//         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+//         minSdk = flutter.minSdkVersion
+//         targetSdk = flutter.targetSdkVersion
+//         versionCode = flutterVersionCode.toInteger()++
+//         versionName = flutterVersionName
+//         // versionName = "1.0.2"
+//     }
+
+//     signingConfigs {
+//         release {
+//             keyAlias 'lappiahnuamah'
+//             keyPassword 'fastlane'
+//             storeFile file("C:/Users/law/Desktop/DEVOPS/fastlane/devops_app/android/my-release-key.jks")
+//             storePassword 'fastlane'
+//         }
+//     }
+
+//     buildTypes {
+//         release {
+//             // TODO: Add your own signing config for the release build.
+//             // Signing with the debug keys for now, so `flutter run --release` works.
+//             signingConfig = signingConfigs.release
+//         }
+//     }
+// }
+
+// flutter {
+//     source = "../.."
+// }
+
+import java.util.Properties
+import java.io.FileInputStream
+import java.io.FileOutputStream
+
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader("UTF-8") { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+if (flutterVersionCode == null) {
+    flutterVersionCode = "2"
+}
+
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
+if (flutterVersionName == null) {
+    flutterVersionName = "2.1.0"
+}
+
+def versionPropsFile = file('version.properties')
+def versionProps = new Properties()
+
+if (versionPropsFile.canRead()) {
+    versionProps.load(new FileInputStream(versionPropsFile))
+} else {
+    // throw new GradleException("Could not read version.properties file!")
+}
+
+def currentVersionCode = versionProps['VERSION_CODE'].toInteger()
+def currentVersionName = versionProps['VERSION_NAME']
+
+android {
+    namespace = "com.devops.new_app"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.devops.new_app"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = currentVersionCode
+        versionName = currentVersionName
+    }
+
+    signingConfigs {
+        release {
+            keyAlias 'lappiahnuamah'
+            keyPassword 'fastlane'
+            storeFile file("C:/Users/law/Desktop/DEVOPS/fastlane/my-release-key.jks")
+            storePassword 'fastlane'
+        }
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.release
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+// Task to increment the version code and update the version.properties file
+task incrementVersionCode {
+    doLast {
+        def newVersionCode = currentVersionCode + 1
+        versionProps['VERSION_CODE'] = newVersionCode.toString()
+        versionProps.store(new FileOutputStream(versionPropsFile), null)
+        println "Version code incremented to ${newVersionCode}"
+    }
+}
+
+// Ensure version code is incremented before the build
+preBuild.dependsOn incrementVersionCode
+

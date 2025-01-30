@@ -1,0 +1,48 @@
+name: Android Build & Deploy
+ 
+on:
+ workflow_dispatch:
+ 
+jobs:
+ deploy:
+   runs-on: ubuntu-latest
+   steps:
+   - uses: actions/checkout@v3
+     with:
+       fetch-depth: 0
+ 
+   - name: Set up ruby env
+     uses: ruby/setup-ruby@v1
+     with:
+       ruby-version: 3.3.3
+      #  bundler-cache: true
+   - name: Testing Fastlane installation
+     run: |
+        pwd
+        cd android
+        bundle update fastlane
+        bundle exec fastlane run validate_play_store_json_key
+    
+   - name: "Setup Java"
+     uses: actions/setup-java@v3
+     with:
+        distribution: "zulu"
+        java-version: "11"
+    
+   - name: "Setup Flutter"
+     uses: subosito/flutter-action@v2
+     with:
+        channel: "stable"
+    
+   - name: Build Android App Package
+     run: |
+        pwd
+        cd android
+        flutter clean
+        flutter build appbundle --release
+    
+   - name: Deploy Google Play
+     run: |
+        pwd
+        cd android
+        bundle exec fastlane ${{env.lane}}

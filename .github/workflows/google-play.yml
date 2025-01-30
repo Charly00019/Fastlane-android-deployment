@@ -1,0 +1,114 @@
+name: Android Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Extracting Build environment and Version Name
+      run: |
+        tag_name=${GITHUB_REF##*/}
+        tag_name_splitted=(${tag_name//@/ })
+        environment=${tag_name_splitted[0]}
+        versionName=${tag_name_splitted[1]}
+        echo "versionName=$versionName" >> $GITHUB_ENV
+        echo "environment=$environment" >> $GITHUB_ENV
+        echo "versionCode=${{ secrets.VERSION_CODE }}" >> $GITHUB_ENV
+
+    - name: Creating Version file
+      run: |
+        cd trial_app/android
+        verPropFile=version.properties
+        touch $verPropFile
+        echo flutter.versionName=${{ env.versionName }} > $verPropFile
+        echo flutter.versionCode=${{ env.versionCode }} >> $verPropFile
+        echo "Contents of version.properties:"
+        cat $verPropFile
+
+    - name: List Files in Directory
+      run: |
+        cd trial_app/android
+        ls -l
+
+    - name: Decrypting Keystore file
+      run: |
+        cd trial_app/android/app
+        keyFile=my-release-key.jks
+        if [ -f "$keyFile.asc" ]; then
+          gpg -d --passphrase "${{ secrets.GPG_PASS }}" --batch $keyFile.asc > $keyFile
+        else
+          echo "Keystore file not found"
+          exit 1
+        fi
+
+    # - name: Decrypting key.properties file
+    #   run: |
+    #     cd trial_app/android
+    #     keyPropFile=key.properties.asc
+    #     if [ -f "$keyPropFile" ]; then
+    #       gpg -d --passphrase "${{ secrets.GPG_PASS }}" --batch $keyPropFile > key.properties
+    #     else
+    #       echo "Key properties file not found"
+    #       exit 1
+    #     fi
+
+    # - name: Decrypting Fastlane Secret file
+    #   run: |
+    #     cd trial_app/android
+    #     file=sa.json.asc
+    #     if [ -f "$file" ]; then
+    #       gpg -d --passphrase "${{ secrets.GPG_PASS }}" --batch $file > sa.json
+    #     else
+    #       echo "Fastlane secret file not found"
+    #       exit 1
+    #     fi
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.3.3
+
+    - name: Install Fastlane dependencies
+      run: |
+        cd trial_app/android
+        bundle install
+
+    - name: Testing Fastlane installation
+      run: |
+        cd trial_app/android
+        bundle update fastlane
+        bundle exec fastlane run validate_play_store_json_key
+
+    - name: "Setup Java"
+      uses: actions/setup-java@v3
+      with:
+        distribution: "zulu"
+        java-version: "19"
+
+    - name: "Setup Flutter"
+      uses: subosito/flutter-action@v2
+      with:
+        channel: "stable"
+
+    - name: Build Android App Package
+      run: |
+        cd trial_app/android
+        flutter clean
+        flutter build appbundle --release
+
+    - name: Deploy Google Play
+      run: |
+        cd trial_app/android
+        bundle exec fastlane ${{ env.lane }}

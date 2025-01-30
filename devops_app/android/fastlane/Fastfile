@@ -1,0 +1,161 @@
+# # This file contains the fastlane.tools configuration
+# # You can find the documentation at https://docs.fastlane.tools
+# #
+# # For a list of all available actions, check out
+# #
+# #     https://docs.fastlane.tools/actions
+# #
+# # For a list of all available plugins, check out
+# #
+# #     https://docs.fastlane.tools/plugins/available-plugins
+# #
+
+# # Uncomment the line if you want fastlane to automatically update itself
+# # update_fastlane
+
+# default_platform(:android)
+
+# platform :android do
+#   desc "Runs all the tests"
+#   lane :test do
+#     gradle(task: "test")
+#   end
+
+#   desc "Submit a new Beta Build to Crashlytics Beta"
+#   lane :beta do
+#     gradle(task: "clean assembleRelease")
+#     crashlytics
+  
+#     # sh "your_script.sh"
+#     # You can also use other beta testing services here
+#   end
+
+#   desc "Deploy a new version to the Google Play"
+#   lane :deploy do
+#     gradle(task: "clean assembleRelease")
+#     supply(
+#     json_key: "../../sa.json",
+#     package_name: "com.devops.new_app",
+#     aab: "../build/app/outputs/bundle/release/app-release.aab",
+#     # skip_upload_metadata: false,
+#     # skip_upload_images: false,
+#     metadata_path: "./fastlane/metadata/android",
+#     skip_upload_images: true,
+#     # skip_upload_screenshots: false,
+#     skip_upload_screenshots: true,
+#     # release_status: "draft",
+#     track: "internal",
+#     rollout: 0.2,
+#     validate_only: false,
+#     release_status: "completed"
+#     )
+#   end
+
+#   #  New Codes added for production to complete the manual 
+#   # lane :production_appbundle do
+#   #   upload_to_play_store(      
+#   #     track: 'production',
+#   #     aab: '../build/app/outputs/bundle/release/app-release.aab',
+#   #   )
+#   # end
+
+#   lane :gp_promote_internal_production do
+#     upload_to_play_store(      
+#       track: 'internal',
+#       skip_upload_apk: true,
+#       skip_upload_aab: true,
+#       skip_upload_metadata: true,
+#       skip_upload_changelogs: true,
+#       skip_upload_images: true,
+#       skip_upload_screenshots: true,
+#       release_status: "completed",
+#       track_promote_to: "internal"
+#     )
+#   end
+# end
+
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Submit a new Beta Build to Crashlytics Beta"
+  lane :beta do
+    gradle(task: "clean bundleRelease")
+    crashlytics
+
+    # sh "your_script.sh"
+    # You can also use other beta testing services here
+  end
+
+  desc "Deploy a new version to the Google Play as a draft"
+  lane :deploy_draft do
+    gradle(task: "clean bundleRelease") # Use bundleRelease to generate AAB
+    supply(
+      json_key: "../../sa.json",
+      package_name: "com.devops.new_app",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      # metadata_path: "./fastlane/metadata/android",
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      track: "internal",
+      # rollout: "0.2",
+      validate_only: false,
+      release_status: "draft" # Initial release status set to draft
+    )
+  end
+
+  desc "Promote internal draft release to completed status"
+  lane :promote_internal do
+    supply(
+      json_key: "../../sa.json",
+      package_name: "com.devops.new_app",
+      track: "internal",
+      rollout: "1.0",
+      validate_only: false,
+      release_status: "completed" # Promotion to completed status
+    )
+  end
+
+  # New Codes added for production to complete the manual 
+  # lane :production_appbundle do
+  #   upload_to_play_store(      
+  #     track: 'production',
+  #     aab: '../build/app/outputs/bundle/release/app-release.aab',
+  #   )
+  # end
+
+  lane :gp_promote_internal_production do
+    supply(
+      json_key: "../../sa.json",
+      package_name: "com.devops.new_app",
+      track: "internal",
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: "completed",
+      track_promote_to: "internal"
+    )
+  end
+end
